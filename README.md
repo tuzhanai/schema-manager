@@ -1,6 +1,6 @@
 # @tuzhanai/schema-manager
 
-数据Schema管理器
+数据 Schema 管理器
 
 ## 安装
 
@@ -11,7 +11,35 @@ npm i @tuzhanai/schema-manager -S
 ## 使用方法
 
 ```typescript
+import SchemaManager from "@tuzhanai/schema-manager";
 
+const manager new SchemaManager();
+
+// 注册基本类型
+manager.type.register("Boolean", {
+  checker: (v: any) => typeof v === "boolean" || (typeof v === "string" && validator.isBoolean(v)),
+  formatter: (v: any) => String(v).toLowerCase() === "true",
+  description: "布尔值",
+  tsType: "boolean",
+  isBuiltin: true,
+  isDefaultFormat: true,
+});
+
+// 注册Schema
+manager.register("Schema1", {
+  field1: {
+    type: "String",
+    default: "hello, world"
+  },
+  field2: {
+    type: "Boolean",
+    default: false
+  }
+});
+
+// 校验并获得参数值
+const { ok, message, value } = manager.value("Schema1", { field1: "xxx", field2: "true"});
+// => { ok: true, message: "success", value: { field1: "xxx", field2: true }}
 ```
 
 ## License
