@@ -257,13 +257,20 @@ export class SchemaType {
       if (!ret.ok) {
         messages.push(`at paramater ${n}: ${ret.message}`);
         invalidParamaters.push(n);
-        invalidParamaterTypes.push(f.type instanceof SchemaType ? f.type.name : f.type)
+        invalidParamaterTypes.push(f.type instanceof SchemaType ? f.type.name : f.type);
         if (this.manager.isAbortEarly) break;
       }
       values[n] = ret.value;
     }
     if (messages.length > 0) {
-      return { ok: false, message: messages.join("\n"), missingParamaters, invalidParamaters, invalidParamaterTypes, value: values };
+      return {
+        ok: false,
+        message: messages.join("\n"),
+        missingParamaters,
+        invalidParamaters,
+        invalidParamaterTypes,
+        value: values,
+      };
     }
     return { ok: true, message: "success", value: values };
   }
