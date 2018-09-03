@@ -126,14 +126,14 @@ describe("SchemaManager", function() {
     expect(value).to.deep.equal({ A: { stringP1: "Hello", numP: 111 }, B: { stringP3: [] } });
   });
 
-  it("type is a schema", function() {
+  it("type is schema", function() {
     const data = { A: { numP: 111 }, B: {} };
     const { ok, value } = manager.value("schema4", data);
     expect(ok).to.equal(true);
     expect(value).to.deep.equal({ A: { stringP1: "Hello", numP: 111 }, B: { stringP3: [] } });
   });
 
-  it("type is a schema[]", function() {
+  it("type is schema[]", function() {
     const data = { C: [{ numP: 111 }, { numP: 222 }], D: [{}, { stringP3: ["666"] }] };
     const { ok, value } = manager.value("schema4", data);
     expect(ok).to.equal(true);

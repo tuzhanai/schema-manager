@@ -15,7 +15,8 @@ import SchemaManager from "@tuzhanai/schema-manager";
 
 const manager new SchemaManager();
 
-// 注册基本类型
+// 注册基本类型，具体参数请参考 @tuzhanai/value-type-manager 模块
+// https://github.com/tuzhanai/value-type-manager
 manager.type.register("Boolean", {
   checker: (v: any) => typeof v === "boolean" || (typeof v === "string" && validator.isBoolean(v)),
   formatter: (v: any) => String(v).toLowerCase() === "true",
