@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { SchemaType, SchemaManager } from "../lib";
+import { SchemaManager } from "../lib";
 import { build, TYPES } from "./helper";
 
 const manager = new SchemaManager();
@@ -13,13 +13,13 @@ const intP = build(TYPES.Integer, "Int");
 
 const schema1: Record<string, any> = { stringP1, stringP2, numP, intP };
 const schema2: Record<string, any> = { stringP3 };
-const Schema1 = new SchemaType(manager, schema1);
-const Schema2 = new SchemaType(manager, schema2);
+const Schema1 = manager.create(schema1);
+const Schema2 = manager.create(schema2);
 manager.register("schema1", schema1);
 manager.register("schema2", schema2);
 
 const schema3 = { A: { type: Schema1 }, B: { type: Schema2 } };
-const Schema3 = new SchemaType(manager, schema3);
+const Schema3 = manager.create(schema3);
 manager.register("schema3", schema3);
 
 const schema4 = { A: { type: "schema1" }, B: { type: "schema2" }, C: { type: "schema1[]" }, D: { type: "schema2[]" } };

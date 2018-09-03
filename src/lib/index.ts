@@ -55,6 +55,9 @@ export class SchemaManager {
     }
   }
 
+  /**
+   * 获取 abortEarly 选项
+   */
   public get isAbortEarly(): boolean {
     return this.options.abortEarly || false;
   }
@@ -85,6 +88,15 @@ export class SchemaManager {
     const s = this.map.get(type);
     assert.ok(s, `schema type "${type}" does not exists`);
     return s!;
+  }
+
+  /**
+   * 创建Schema但不自动注册
+   * @param fields 字段信息
+   * @param name Schema名称
+   */
+  public create(fields: ISchemaTypeFields, name?: string): SchemaType {
+    return new SchemaType(this, fields, name);
   }
 
   /**
