@@ -96,6 +96,13 @@ describe("SchemaType", function() {
     expect(missingParamaters).to.deep.equal(["stringP2"]);
     expect(invalidParamaters).to.deep.equal([]);
   });
+
+  it("invalidParamaters", function() {
+    const { ok, invalidParamaters, invalidParamaterTypes } = Schema1.pick("numP").value({ numP: "aaa" });
+    expect(ok).to.equal(false);
+    expect(invalidParamaters).to.deep.equal(["numP"]);
+    expect(invalidParamaterTypes).to.deep.equal(["Number"]);
+  });
 });
 
 describe("SchemaManager", function() {

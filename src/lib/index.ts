@@ -36,6 +36,8 @@ export interface ISchemaCheckResult {
   missingParamaters?: string[];
   /** 错误的参数列表 */
   invalidParamaters?: string[];
+  /** 错误的参数类型列表 */
+  invalidParamaterTypes?: string[];
   /** 结果 */
   value: any;
 }
@@ -115,7 +117,7 @@ export class SchemaManager {
     }
     const ret = this.baseTypeValue(name, isArray, input, {}, undefined);
     if (ret.ok) return ret;
-    return { ...ret, missingParamaters: [], invalidParamaters: [type] };
+    return { ...ret, missingParamaters: [], invalidParamaters: [], invalidParamaterTypes: [] };
   }
 
   /**
@@ -226,6 +228,7 @@ export class SchemaType {
     const messages: string[] = [];
     const missingParamaters: string[] = [];
     const invalidParamaters: string[] = [];
+    const invalidParamaterTypes: string[] = [];
     const values: Record<string, any> = {};
     for (const n in this.fields) {
       const f = this.fields[n];
@@ -254,12 +257,13 @@ export class SchemaType {
       if (!ret.ok) {
         messages.push(`at paramater ${n}: ${ret.message}`);
         invalidParamaters.push(n);
+        invalidParamaterTypes.push(f.type instanceof SchemaType ? f.type.name : f.type)
         if (this.manager.isAbortEarly) break;
       }
       values[n] = ret.value;
     }
     if (messages.length > 0) {
-      return { ok: false, message: messages.join("\n"), missingParamaters, invalidParamaters, value: values };
+      return { ok: false, message: messages.join("\n"), missingParamaters, invalidParamaters, invalidParamaterTypes, value: values };
     }
     return { ok: true, message: "success", value: values };
   }
