@@ -74,6 +74,18 @@ describe("SchemaType", function() {
     expect(ok).to.equal(true);
     expect(value).to.deep.equal({ A: { stringP1: "Hello", numP: 111 }, B: { stringP3: [] } });
   });
+
+  it("pick", function() {
+    const { ok, value } = Schema1.pick("stringP1").value({});
+    expect(ok).to.equal(true);
+    expect(value).to.deep.equal({ stringP1: "Hello" });
+  });
+
+  it("partial", function() {
+    const { ok, value } = Schema1.partial().value({});
+    expect(ok).to.equal(true);
+    expect(value).to.deep.equal({ stringP1: "Hello" });
+  });
 });
 
 describe("SchemaManager", function() {
