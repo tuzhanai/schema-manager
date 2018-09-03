@@ -86,6 +86,16 @@ describe("SchemaType", function() {
     expect(ok).to.equal(true);
     expect(value).to.deep.equal({ stringP1: "Hello" });
   });
+
+  it("required", function() {
+    const { ok, message, missingParamaters, invalidParamaters } = Schema1.pick("stringP2")
+      .required()
+      .value({});
+    expect(ok).to.equal(false);
+    expect(message).to.equal("missing required paramater stringP2");
+    expect(missingParamaters).to.deep.equal(["stringP2"]);
+    expect(invalidParamaters).to.deep.equal([]);
+  });
 });
 
 describe("SchemaManager", function() {

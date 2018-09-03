@@ -5,7 +5,7 @@
  */
 
 import * as assert from "assert";
-import ValueTypeManager from "@tuzhanai/value-type-manager";
+import { ValueTypeManager } from "@tuzhanai/value-type-manager";
 export * from "@tuzhanai/value-type-manager";
 
 export interface ISchemaTypeFields {
@@ -32,6 +32,10 @@ export interface ISchemaCheckResult {
   ok: boolean;
   /** 如果失败，此项为出错信息 */
   message: string;
+  /** 缺少的参数列表 */
+  missingParamaters?: string[];
+  /** 错误的参数列表 */
+  invalidParamaters?: string[];
   /** 结果 */
   value: any;
 }
@@ -109,7 +113,9 @@ export class SchemaManager {
     if (this.has(name)) {
       return this.get(type).value(input, isArray);
     }
-    return this.baseTypeValue(name, isArray, input, {}, undefined);
+    const ret = this.baseTypeValue(name, isArray, input, {}, undefined);
+    if (ret.ok) return ret;
+    return { ...ret, missingParamaters: [], invalidParamaters: [type] };
   }
 
   /**
@@ -181,6 +187,17 @@ export class SchemaType {
   }
 
   /**
+   * 从当前Schema获取所有字段为必填的新Schema
+   */
+  public required(): SchemaType {
+    const fields: ISchemaTypeFields = {};
+    for (const n in this.fields) {
+      fields[n] = { ...this.fields[n], required: true };
+    }
+    return new SchemaType(this.manager, fields, this.name && `Required<${this.name}>`);
+  }
+
+  /**
    * 检查Schema并返回值
    * @param input
    */
@@ -207,41 +224,42 @@ export class SchemaType {
     }
 
     const messages: string[] = [];
+    const missingParamaters: string[] = [];
+    const invalidParamaters: string[] = [];
     const values: Record<string, any> = {};
     for (const n in this.fields) {
       const f = this.fields[n];
-      if (n in input) {
-        // 尝试解析值
-        const v = input[n];
-        let ret: ISchemaCheckResult;
-        if (f.type instanceof SchemaType) {
-          ret = f.type.value(v);
-        } else {
-          const { name, isArray } = parseTypeName(f.type);
-          if (this.manager.has(name)) {
-            ret = this.manager.get(name).value(v, isArray);
-          } else {
-            ret = this.manager.baseTypeValue(name, isArray, v, f.params, f.format);
-          }
-        }
-        if (!ret.ok) {
-          messages.push(`at paramater ${n}: ${ret.message}`);
+      const v = input[n] === undefined ? f.default : input[n];
+
+      if (v === undefined) {
+        if (f.required) {
+          messages.push(`missing required paramater ${n}`);
+          missingParamaters.push(n);
           if (this.manager.isAbortEarly) break;
         }
-        values[n] = ret.value;
+        continue;
+      }
+
+      let ret: ISchemaCheckResult;
+      if (f.type instanceof SchemaType) {
+        ret = f.type.value(v);
       } else {
-        // 当输入值不存在时
-        if (typeof f.default !== "undefined") {
-          // 如果有默认值
-          values[n] = f.default;
-        } else if (f.required) {
-          // 如果为必填项
-          messages.push(`missing required paramater ${n}`);
+        const { name, isArray } = parseTypeName(f.type);
+        if (this.manager.has(name)) {
+          ret = this.manager.get(name).value(v, isArray);
+        } else {
+          ret = this.manager.baseTypeValue(name, isArray, v, f.params, f.format);
         }
       }
+      if (!ret.ok) {
+        messages.push(`at paramater ${n}: ${ret.message}`);
+        invalidParamaters.push(n);
+        if (this.manager.isAbortEarly) break;
+      }
+      values[n] = ret.value;
     }
     if (messages.length > 0) {
-      return { ok: false, message: messages.join("\n"), value: values };
+      return { ok: false, message: messages.join("\n"), missingParamaters, invalidParamaters, value: values };
     }
     return { ok: true, message: "success", value: values };
   }
