@@ -36,13 +36,28 @@ export interface ISchemaCheckResult {
   value: any;
 }
 
-export interface SchemaManagerOptions {}
+export interface SchemaManagerOptions {
+  /* 自定义ValueTypeManager实例 */
+  type?: ValueTypeManager;
+  /** 如果为true则解析时遇到第一个错误即停止接续解析 */
+  abortEarly?: boolean;
+}
 
 export class SchemaManager {
   protected readonly map: Map<string, SchemaType> = new Map();
-  public readonly type: ValueTypeManager = new ValueTypeManager();
+  public readonly type: ValueTypeManager;
 
-  constructor(protected readonly options: SchemaManagerOptions = {}) {}
+  constructor(protected readonly options: SchemaManagerOptions = {}) {
+    if (options.type) {
+      this.type = options.type;
+    } else {
+      this.type = new ValueTypeManager();
+    }
+  }
+
+  public get isAbortEarly(): boolean {
+    return this.options.abortEarly || false;
+  }
 
   /**
    * 注册Schema
@@ -105,6 +120,7 @@ export class SchemaManager {
         const ret = this.type.value(type, input[i], params, format);
         if (!ret.ok) {
           messages.push(`at array index ${i}: ${ret.message}`);
+          if (this.isAbortEarly) break;
         }
         values.push(ret.value);
       }
@@ -168,6 +184,7 @@ export class SchemaType {
         const ret = this.value(input[i], false);
         if (!ret.ok) {
           messages.push(`at array index ${i}: ${ret.message}`);
+          if (this.manager.isAbortEarly) break;
         }
         values.push(ret.value);
       }
@@ -197,6 +214,7 @@ export class SchemaType {
         }
         if (!ret.ok) {
           messages.push(`at paramater ${n}: ${ret.message}`);
+          if (this.manager.isAbortEarly) break;
         }
         values[n] = ret.value;
       } else {
