@@ -171,4 +171,12 @@ describe("SchemaManager", function() {
       D: [{ stringP3: [] }, { stringP3: ["666"] }],
     });
   });
+
+  it("forEach", function() {
+    const schemas: string[] = [];
+    manager.forEach((_, key) => {
+      schemas.push(key);
+    });
+    expect(schemas.length).to.equal(4);
+  });
 });

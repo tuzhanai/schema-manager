@@ -97,6 +97,14 @@ export class SchemaManager {
   }
 
   /**
+   * 遍历类型
+   * @param iter 迭代函数
+   */
+  public forEach(iter: (value: SchemaType, key: string, map: Map<string, SchemaType>) => void) {
+    return this.map.forEach(iter);
+  }
+
+  /**
    * 创建Schema但不自动注册
    * @param fields 字段信息
    * @param name Schema名称
