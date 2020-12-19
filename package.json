@@ -1,6 +1,6 @@
 {
   "name": "@tuzhanai/schema-manager",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "数据Schema管理器",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
@@ -9,7 +9,10 @@
   ],
   "scripts": {
     "test": "mocha --require ts-node/register src/test/**/*.spec.ts",
-    "prepublish": "npm test && rm -rf dist && tsc"
+    "tag": "git tag v`node -p 'require(\"./package\").version'`",
+    "format": "prettier --write 'src/**/*.ts'",
+    "prepublishOnly": "npm test && rm -rf dist && tsc",
+    "postpublish": "npm run tag && git push && git push --tags"
   },
   "repository": {
     "type": "git",
@@ -20,21 +23,27 @@
     "manager"
   ],
   "author": "Zongmin Lei <leizongmin@gmail.com>",
+  "contributors": [
+    "Yourtion Guo <yourtion@gmail.com>"
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/tuzhanai/schema-manager/issues"
   },
   "homepage": "https://github.com/tuzhanai/schema-manager#readme",
+  "peerDependencies": {
+    "@types/node": "*"
+  },
   "devDependencies": {
-    "@types/chai": "^4.1.4",
-    "@types/mocha": "^5.2.5",
-    "chai": "^4.1.2",
-    "mocha": "^5.2.0",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.0",
+    "@types/node": "^14.14.14",
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@tuzhanai/value-type-manager": "^1.0.7",
-    "@types/node": "^10.9.4"
+    "@tuzhanai/value-type-manager": "^1.1.1"
   }
 }

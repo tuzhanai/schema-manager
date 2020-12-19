@@ -1,0 +1,58 @@
+{
+  "A": {
+    "type": "object",
+    "required": ["stringP1", "numP"],
+    "description": "schema1",
+    "properties": {
+      "stringP1": { "type": "string", "description": "StringSchema", "enum": [], "default": "Hello" },
+      "stringP2": { "type": "string", "description": "StringSchema", "enum": [] },
+      "numP": { "type": "number", "description": "Number", "enum": [] },
+      "intP": { "type": "integer", "description": "Int", "enum": [] }
+    }
+  },
+  "B": {
+    "type": "object",
+    "required": [],
+    "description": "",
+    "properties": {
+      "stringP3": {
+        "type": "array",
+        "description": "StringArraySchema",
+        "enum": [],
+        "items": { "type": "string" },
+        "default": []
+      }
+    }
+  },
+  "C": {
+    "type": "array",
+    "description": "",
+    "items": {
+      "type": "object",
+      "required": ["stringP1", "numP"],
+      "properties": {
+        "stringP1": { "type": "string", "description": "StringSchema", "enum": [], "default": "Hello" },
+        "stringP2": { "type": "string", "description": "StringSchema", "enum": [] },
+        "numP": { "type": "number", "description": "Number", "enum": [] },
+        "intP": { "type": "integer", "description": "Int", "enum": [] }
+      }
+    }
+  },
+  "D": {
+    "type": "array",
+    "description": "",
+    "items": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "stringP3": {
+          "type": "array",
+          "description": "StringArraySchema",
+          "enum": [],
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    }
+  }
+}

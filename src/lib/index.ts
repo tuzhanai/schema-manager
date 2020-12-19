@@ -1,17 +1,20 @@
 /**
- * @tuzhanai/schema-manager
+ * @gz/schema-manager
  *
  * @author Zongmin Lei <leizongmin@gmail.com>
+ * @author Yourtion Guo <yourtion@gmail.com>
  */
 
 import * as assert from "assert";
 import { ValueTypeManager } from "@tuzhanai/value-type-manager";
 export * from "@tuzhanai/value-type-manager";
 
+// Scheam 的类型结构
 export interface ISchemaTypeFields {
   [name: string]: ISchemaTypeFieldInfo;
 }
 
+// Scheam 字段的详细信息
 export interface ISchemaTypeFieldInfo {
   /** 数据类型 */
   type: string | SchemaType;
@@ -181,7 +184,7 @@ export class SchemaType {
     return new SchemaType(
       this.manager,
       fields,
-      this.name && `Pick<${this.name}, ${fieldNames.map(n => `"${n}"`).join(" | ")}>`,
+      this.name && `Pick<${this.name}, ${fieldNames.map((n) => `"${n}"`).join(" | ")}>`,
     );
   }
 
@@ -238,16 +241,19 @@ export class SchemaType {
     const invalidParamaters: string[] = [];
     const invalidParamaterTypes: string[] = [];
     const values: Record<string, any> = {};
+    // 遍历处理输入的 input 信息，与 对应的 Schema Type 的配置进行比较
     for (const n in this.fields) {
       const f = this.fields[n];
       const v = input[n] === undefined ? f.default : input[n];
 
+      // 判断是否缺失某个字段
       if (v === undefined) {
         if (f.required) {
           messages.push(`missing required paramater ${n}`);
           missingParamaters.push(n);
           if (this.manager.isAbortEarly) break;
         }
+        // 没有该字段，直接循环下一个 字段
         continue;
       }
 
@@ -282,10 +288,80 @@ export class SchemaType {
     }
     return { ok: true, message: "success", value: values };
   }
+
+  /**
+   * 获取 schema swagger 的展开信息
+   * @param {boolean} [isArray=false]
+   * @returns {Record<string, any>} ISchemaTypeFieldInfo
+   * @memberof SchemaType
+   */
+  public swaggerValue(): {
+    required: Array<string>;
+    properties: Record<string, any>;
+  } {
+    const values: Record<string, any> = {};
+    const required: Array<string> = [];
+    for (const n in this.fields) {
+      const f = this.fields[n];
+      values[n] = {};
+      // 判断是否是嵌套的 Schema
+      if (f.type instanceof SchemaType) {
+        let { required, properties } = f.type.swaggerValue();
+        values[n] = {
+          type: "object",
+          required: required,
+          properties: properties,
+        };
+      } else {
+        const { name, isArray } = parseTypeName(f.type);
+        if (this.manager.has(name) && isArray) {
+          let { required, properties } = this.manager.get(name).swaggerValue();
+          values[n].type = "array";
+          values[n].description = f.comment || "";
+          values[n].items = {
+            type: "object",
+            required: required,
+            properties: properties,
+          };
+        } else if (this.manager.has(name)) {
+          let { required, properties } = this.manager.get(name).swaggerValue();
+          values[n] = {
+            type: "object",
+            required: required,
+            description: f.comment || "",
+            properties: properties,
+          };
+        } else if (isArray) {
+          values[n] = {
+            type: "array",
+            description: f.comment,
+            enum: f.params || [],
+            items: {
+              type: this.manager.type.get(name).info.swaggerType,
+            },
+          };
+          f.default ? (values[n].default = f.default) : "";
+          f.required ? required.push(n) : "";
+        } else {
+          values[n] = {
+            type: this.manager.type.get(name).info.swaggerType,
+            description: f.comment,
+            enum: f.params || [],
+          };
+          f.default ? (values[n].default = f.default) : "";
+          f.required ? required.push(n) : "";
+        }
+      }
+    }
+    return {
+      required,
+      properties: values,
+    };
+  }
 }
 
 /**
- * 解析类型名称
+ * 解析类型名称 判断在书写类型的时候 是否是 "type[]" 这种格式，是否是数组类型
  * @param type 类型
  */
 export function parseTypeName(type: string): { name: string; isArray: boolean } {
