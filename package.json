@@ -1,6 +1,6 @@
 {
   "name": "@tuzhanai/schema-manager",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "数据Schema管理器",
   "main": "dist/lib/index.js",
   "typings": "dist/lib/index.d.ts",
@@ -44,6 +44,6 @@
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "@tuzhanai/value-type-manager": "^1.1.1"
+    "@tuzhanai/value-type-manager": "^1.2.0"
   }
 }
